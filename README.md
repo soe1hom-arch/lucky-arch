@@ -6,14 +6,23 @@ Combines `simg2img` + `lpunpack` into a single pure-Go binary with zero intermed
 
 ## Usage
 
-```bash
-lucky-arch [-v] [-l] [-o output_dir] super.img
 ```
+lucky-arch [options] <super_image>
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `-o`, `-output <dir>` | Output directory (default: `<name>.parts/`) |
+| `-v`, `-verbose` | Show detailed progress and metadata info |
+| `-l`, `-list` | List partitions and exit without extracting |
+| `-version` | Show version and exit |
 
 ### Examples
 
 ```bash
-# Extract all partitions
+# Extract all partitions to super.parts/
 lucky-arch super.img
 
 # Verbose mode
@@ -22,21 +31,40 @@ lucky-arch -v super.img
 # Custom output directory
 lucky-arch -v -o partitions/ super.img
 
-# List partitions only
+# List partitions only (no extraction)
 lucky-arch -l super.img
 ```
 
 ## How it works
 
-1. Detects if the input is sparse or raw automatically
-2. For sparse images, builds an in-memory chunk index (no full decompression)
-3. Parses LP metadata (AOSP liblp format) to find partitions and extents
-4. Extracts partitions directly using `io.SectionReader` — reads only the needed bytes from the sparse file
+1. **Auto-detect** — checks if input is sparse (`0xED26FF3A`) or raw
+2. **On-the-fly de-sparse** — for sparse images, builds an in-memory chunk index (no full decompression to disk)
+3. **Parse LP metadata** — reads geometry + partition table (AOSP liblp v10.x format)
+4. **Direct extraction** — copies only the needed bytes using `io.SectionReader`, handling both RAW/FILL/DONTCARE sparse chunks transparently
 
 ### Supported formats
 
-- **Input**: Android sparse `super.img` (raw or sparse)
-- **Output**: Individual `.img` files per partition (system, vendor, product, etc.)
+- **Input**: Android `super.img` (raw or sparse)
+- **Output**: Individual `.img` files per partition (e.g. `system_a.img`, `vendor_a.img`, `product_a.img`)
+
+> Partitions with the `slot_suffixed` attribute automatically get `_a` appended.
+
+### Output directory
+
+By default the output directory is the input filename without extension + `.parts/`:
+- `super.img` → `super.parts/`
+- `super.raw.img` → `super.raw.parts/`
+
+Use `-o dir/` to override.
+
+## Troubleshooting
+
+| Error | Cause & Solution |
+|-------|------------------|
+| `invalid LP header magic: 0x00000000` | Metadata offset mismatch. Update to v1.0.1+ which fixes this. |
+| `no valid geometry found` | File is not a valid super image, or is in an unsupported format. |
+| `sparse: raw-size mismatch` | Corrupted sparse image. Try `simg2img` first to validate. |
+| `permission denied` | Make sure output directory is writable. |
 
 ## Build
 
@@ -44,6 +72,9 @@ lucky-arch -l super.img
 git clone https://github.com/soe1hom-arch/lucky-arch.git
 cd lucky-arch
 go build -o lucky-arch .
+
+# Cross-compile for ARM64 (Android Termux)
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o lucky-arch .
 ```
 
 ## License
