@@ -4,6 +4,8 @@ Extract partitions from Android sparse `super.img` **on the fly** — without wr
 
 Combines `simg2img` + `lpunpack` into a single pure-Go binary with zero intermediate I/O.
 
+Download pre-built binaries from [GitHub Releases](https://github.com/soe1hom-arch/lucky-arch/releases).
+
 ## Usage
 
 ```
@@ -47,6 +49,7 @@ lucky-arch -l super.img
 - **Input**: Android `super.img` (raw or sparse)
 - **Output**: Individual `.img` files per partition (e.g. `system_a.img`, `vendor_a.img`, `product_a.img`)
 
+> Only slot 0 (typically the active `_a` slot) is extracted by default.
 > Partitions with the `slot_suffixed` attribute automatically get `_a` appended.
 
 ### Output directory
@@ -76,6 +79,11 @@ go build -o lucky-arch .
 # Cross-compile for ARM64 (Android Termux)
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o lucky-arch .
 ```
+
+## Related
+
+- [simg2img](https://github.com/soe1hom-arch/simg2img) — sparse to raw converter (standalone)
+- [lpunpack](https://github.com/soe1hom-arch/lpunpack) — LP partition extractor (standalone)
 
 ## License
 
