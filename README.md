@@ -10,6 +10,7 @@ Download pre-built binaries from [GitHub Releases](https://github.com/soe1hom-ar
 
 ```
 lucky-arch [options] <super_image>
+lucky-arch --to-raw <sparse_image> [output_raw]
 ```
 
 ### Options
@@ -19,6 +20,7 @@ lucky-arch [options] <super_image>
 | `-o`, `-output <dir>` | Output directory (default: `<name>.parts/`) |
 | `-v`, `-verbose` | Show detailed progress and metadata info |
 | `-l`, `-list` | List partitions and exit without extracting |
+| `--to-raw`, `--raw` | Convert sparse image to raw (simg2img mode) |
 | `-version` | Show version and exit |
 
 ### Examples
