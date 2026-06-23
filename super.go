@@ -346,14 +346,22 @@ func (sp *SuperImage) findGeometry() (*LpMetadataGeometry, int64, error) {
 // ─── Metadata helper ──────────────────────────────────────────────────────
 
 func primaryMetadataOffset(g *LpMetadataGeometry, geoOff int64, slot uint32) int64 {
-	start := geoOff + int64(LPMetadataGeometrySize)
-	return start + int64(slot)*int64(g.MetadataMaxSize)
+	if geoOff < LPPartitionReservedBytes {
+		return geoOff + int64(LPMetadataGeometrySize) + int64(slot)*int64(g.MetadataMaxSize)
+	}
+	r := LPPartitionReservedBytes + (LPMetadataGeometrySize * 2)
+	return int64(r) + int64(slot)*int64(g.MetadataMaxSize)
 }
 
 func backupMetadataOffset(g *LpMetadataGeometry, geoOff int64, slot uint32) int64 {
-	start := geoOff + int64(LPMetadataGeometrySize)
-	totalSlots := int64(g.MetadataSlotCount)
-	return start + totalSlots*int64(g.MetadataMaxSize) + int64(slot)*int64(g.MetadataMaxSize)
+	if geoOff < LPPartitionReservedBytes {
+		start := geoOff + int64(LPMetadataGeometrySize)
+		start += int64(g.MetadataMaxSize) * int64(g.MetadataSlotCount)
+		return start + int64(slot)*int64(g.MetadataMaxSize)
+	}
+	start := int64(LPPartitionReservedBytes + (LPMetadataGeometrySize * 2))
+	start += int64(g.MetadataMaxSize) * int64(g.MetadataSlotCount)
+	return start + int64(slot)*int64(g.MetadataMaxSize)
 }
 
 // ─── Metadata header & table parsing ──────────────────────────────────────
