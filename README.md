@@ -82,6 +82,15 @@ go build -o lucky-arch .
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o lucky-arch .
 ```
 
+## Credits
+
+- **soe1hom-arch** — Go implementation and maintenance
+- This project combines functionality from two AOSP-derived tools:
+  - `simg2img` — sparse to raw conversion (AOSP sparse format)
+  - `lpunpack` — LP metadata parsing & partition extraction (AOSP liblp)
+- [AOSP liblp](https://android.googlesource.com/platform/system/core/+/refs/heads/main/fs_mgr/liblp/) — Logical partition metadata format
+- [AOSP sparse format](https://android.googlesource.com/platform/system/core/+/refs/heads/main/libsparse/sparse_format.h) — Sparse image format
+
 ## Related
 
 - [simg2img](https://github.com/soe1hom-arch/simg2img) — sparse to raw converter (standalone)
